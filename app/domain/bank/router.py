@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.domain.auth.dependencies import get_current_user, require_roles
 from app.domain.bank.exceptions import (
     AccountInactiveError,
     AccountNotFoundError,
@@ -12,14 +13,16 @@ from app.domain.bank.exceptions import (
     InvalidAmountError,
     SameAccountTransferError,
 )
-from app.domain.bank.repository import AccountRepository
+from app.domain.bank.repository import AccountRepository, TransactionRepository
 from app.domain.bank.schemas import (
     AccountCreateRequest,
     AccountResponse,
+    TransactionResponse,
     TransferRequest,
     TransferResult,
 )
 from app.domain.bank.transfer_service import TransferService
+from app.models.user import Role, User
 
 router = APIRouter(prefix="/bank", tags=["bank"])
 
@@ -36,9 +39,9 @@ def _generate_account_number() -> str:
 async def create_account(
     request: AccountCreateRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles(Role.BANK_TELLER, Role.ADMIN)),
 ) -> AccountResponse:
-    # get_db provides a session with begin() — COMMIT happens automatically
-    # on clean exit; ROLLBACK on any unhandled exception.
+    """Create a bank account.  Requires BankTeller or Admin role."""
     repo = AccountRepository(db)
     account = await repo.create(
         user_id=request.user_id,
@@ -58,16 +61,29 @@ async def create_account(
 async def transfer(
     request: TransferRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> TransferResult:
     """Execute a transfer within an atomic DB transaction.
 
+    - **Customer**: can only transfer from an account they own.
+    - **BankTeller / Admin**: can transfer between any accounts.
+
     The session from get_db is already wrapped in begin():
     - Debit + credit + ledger entries all flush inside the same transaction.
-    - If TransferService raises a domain exception, we convert it to an
-      HTTPException *before* the context manager exits — SQLAlchemy then
-      rolls back the transaction automatically.
-    - If no exception is raised, begin().__aexit__ commits automatically.
+    - On any domain exception we raise an HTTPException before the context
+      manager exits — SQLAlchemy rolls back automatically.
+    - On clean exit, begin().__aexit__ commits automatically.
     """
+    # Ownership check for customers
+    if current_user.role == Role.CUSTOMER:
+        account_repo = AccountRepository(db)
+        from_account = await account_repo.get_by_id(request.from_account_id)
+        if from_account is None or from_account.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only transfer from your own accounts",
+            )
+
     service = TransferService(db)
     try:
         return await service.transfer(request)
@@ -79,3 +95,36 @@ async def transfer(
         )
     except (InvalidAmountError, SameAccountTransferError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+
+@router.get(
+    "/accounts/{account_id}/transactions",
+    response_model=list[TransactionResponse],
+)
+async def get_transactions(
+    account_id: int,
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[TransactionResponse]:
+    """Return ledger entries for an account, newest first.
+
+    - **Customer**: can only view transactions for their own accounts.
+    - **BankTeller / Admin**: can view transactions for any account.
+    """
+    account_repo = AccountRepository(db)
+    account = await account_repo.get_by_id(account_id)
+
+    if account is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+
+    if current_user.role == Role.CUSTOMER and account.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only view transactions for your own accounts",
+        )
+
+    txn_repo = TransactionRepository(db)
+    transactions = await txn_repo.get_by_account(account_id, limit=limit, offset=offset)
+    return [TransactionResponse.model_validate(t) for t in transactions]

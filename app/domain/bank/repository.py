@@ -105,6 +105,19 @@ class TransactionRepository:
         )
         return list(result.scalars().all())
 
+    async def get_by_account(
+        self, account_id: int, *, limit: int = 50, offset: int = 0
+    ) -> list[Transaction]:
+        """Return ledger entries for an account, newest first."""
+        result = await self._session.execute(
+            select(Transaction)
+            .where(Transaction.account_id == account_id)
+            .order_by(Transaction.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        return list(result.scalars().all())
+
 
 class TransferRepository:
     def __init__(self, session: AsyncSession) -> None:

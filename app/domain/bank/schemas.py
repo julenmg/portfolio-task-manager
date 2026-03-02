@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -37,3 +38,29 @@ class TransferResult(BaseModel):
     amount: Decimal
     from_balance_after: Decimal
     to_balance_after: Decimal
+
+
+class TransactionResponse(BaseModel):
+    id: int
+    account_id: int
+    amount: Decimal
+    transaction_type: str
+    balance_after: Decimal
+    reference_code: str | None
+    description: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AuditLogResponse(BaseModel):
+    id: int
+    method: str
+    path: str
+    client_ip: str
+    user_id: int | None
+    status_code: int
+    reason: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
