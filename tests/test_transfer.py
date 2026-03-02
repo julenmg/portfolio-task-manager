@@ -6,6 +6,8 @@ from app.models.transaction import Transaction
 from app.models.user import User
 from app.schemas.transfer import TransferRequest
 from app.services.transfer_service import TransferService
+from app.services.user_service import UserService
+from app.schemas.user import UserRegisterRequest
 import pytest
 
 @pytest.mark.asyncio
