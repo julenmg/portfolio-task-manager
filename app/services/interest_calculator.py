@@ -1,9 +1,11 @@
 from decimal import Decimal
 from enum import Enum
 
+
 class CompoundingPeriod(Enum):
     MONTHLY = "monthly"
     ANNUALLY = "annually"
+
 
 class InterestCalculator:
     @staticmethod
@@ -22,12 +24,13 @@ class InterestCalculator:
             compounding: Compounding period (default is monthly).
         """
         if compounding == CompoundingPeriod.MONTHLY:
-            n = 12
+            n = Decimal(12)
         elif compounding == CompoundingPeriod.ANNUALLY:
-            n = 1
+            n = Decimal(1)
         else:
             raise ValueError("Invalid compounding period")
 
-        t = days / 365
-        i = principal * (1 + annual_rate / n) ** (n * t) - principal
-        return i
+        # Both n and t must be Decimal so that `Decimal ** Decimal` is used.
+        # Using plain float would raise TypeError: unsupported operand for **.
+        t = Decimal(days) / Decimal(365)
+        return principal * (1 + annual_rate / n) ** (n * t) - principal

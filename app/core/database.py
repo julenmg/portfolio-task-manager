@@ -14,5 +14,15 @@ class Base(DeclarativeBase):
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
+    """Dependency that provides a DB session with explicit transaction management.
+
+    Uses ``begin()`` so that:
+    - The transaction is started explicitly (BEGIN).
+    - On a clean request exit the session auto-commits (COMMIT).
+    - On any unhandled exception the session auto-rolls back (ROLLBACK).
+
+    Routers that use this dependency must NOT call ``session.commit()``
+    themselves — the context manager does it automatically.
+    """
+    async with AsyncSessionLocal.begin() as session:
         yield session

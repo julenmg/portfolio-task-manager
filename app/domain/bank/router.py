@@ -37,6 +37,8 @@ async def create_account(
     request: AccountCreateRequest,
     db: AsyncSession = Depends(get_db),
 ) -> AccountResponse:
+    # get_db provides a session with begin() — COMMIT happens automatically
+    # on clean exit; ROLLBACK on any unhandled exception.
     repo = AccountRepository(db)
     account = await repo.create(
         user_id=request.user_id,
@@ -45,7 +47,6 @@ async def create_account(
         interest_rate=request.interest_rate,
         currency=request.currency,
     )
-    await db.commit()
     return AccountResponse.model_validate(account)
 
 
@@ -58,11 +59,18 @@ async def transfer(
     request: TransferRequest,
     db: AsyncSession = Depends(get_db),
 ) -> TransferResult:
+    """Execute a transfer within an atomic DB transaction.
+
+    The session from get_db is already wrapped in begin():
+    - Debit + credit + ledger entries all flush inside the same transaction.
+    - If TransferService raises a domain exception, we convert it to an
+      HTTPException *before* the context manager exits — SQLAlchemy then
+      rolls back the transaction automatically.
+    - If no exception is raised, begin().__aexit__ commits automatically.
+    """
     service = TransferService(db)
     try:
-        result = await service.transfer(request)
-        await db.commit()
-        return result
+        return await service.transfer(request)
     except (AccountNotFoundError, AccountInactiveError) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except InsufficientFundsError as exc:
