@@ -1,3 +1,3 @@
-from .account import Account
-from .transaction import Transaction
-from .user import User
+from app.models.user import User  # noqa: F401
+
+__all__ = ["User"]
