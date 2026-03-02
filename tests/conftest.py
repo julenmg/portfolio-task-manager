@@ -1,13 +1,21 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
 from app.main import app
 
+# StaticPool forces all connections (including the AuditMiddleware's own
+# sessions) to reuse the same underlying SQLite connection, so committed
+# audit-log rows are immediately visible to subsequent test queries.
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
-test_engine = create_async_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+test_engine = create_async_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
@@ -15,7 +23,12 @@ TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
 async def setup_database():
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    # Let the AuditMiddleware write to the same in-memory DB.
+    app.state.session_factory = TestSessionLocal
+
     yield
+
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
