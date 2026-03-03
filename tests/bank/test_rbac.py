@@ -259,6 +259,93 @@ async def test_create_account_admin_allowed(
     assert resp.status_code == 201
 
 
+# ── GET /bank/accounts (list) ────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_list_accounts_no_token(client: AsyncClient) -> None:
+    resp = await client.get("/api/v1/bank/accounts")
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_list_accounts_customer_sees_own(
+    client: AsyncClient,
+    checking_account,
+    customer_user: User,
+) -> None:
+    resp = await client.get("/api/v1/bank/accounts", headers=_auth(customer_user))
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert all(a["user_id"] == customer_user.id for a in data)
+
+
+@pytest.mark.asyncio
+async def test_list_accounts_admin_sees_all(
+    client: AsyncClient,
+    checking_account,
+    second_checking_account,
+    admin_user: User,
+) -> None:
+    resp = await client.get("/api/v1/bank/accounts", headers=_auth(admin_user))
+    assert resp.status_code == 200
+    assert len(resp.json()) >= 2
+
+
+# ── GET /bank/accounts/{id} ───────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_get_account_owner_allowed(
+    client: AsyncClient,
+    checking_account,
+    customer_user: User,
+) -> None:
+    resp = await client.get(
+        f"/api/v1/bank/accounts/{checking_account.id}",
+        headers=_auth(customer_user),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["id"] == checking_account.id
+
+
+@pytest.mark.asyncio
+async def test_get_account_other_customer_denied(
+    client: AsyncClient,
+    second_checking_account,
+    customer_user: User,
+) -> None:
+    """Customer cannot view an account belonging to another user."""
+    resp = await client.get(
+        f"/api/v1/bank/accounts/{second_checking_account.id}",
+        headers=_auth(customer_user),
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_get_account_teller_allowed(
+    client: AsyncClient,
+    checking_account,
+    teller_user: User,
+) -> None:
+    resp = await client.get(
+        f"/api/v1/bank/accounts/{checking_account.id}",
+        headers=_auth(teller_user),
+    )
+    assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_get_account_not_found(
+    client: AsyncClient,
+    admin_user: User,
+) -> None:
+    resp = await client.get("/api/v1/bank/accounts/99999", headers=_auth(admin_user))
+    assert resp.status_code == 404
+
+
 # ── GET /audit/logs ──────────────────────────────────────────────────────────
 
 

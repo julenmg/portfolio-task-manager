@@ -2,6 +2,7 @@ import random
 import string
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -13,6 +14,7 @@ from app.domain.bank.exceptions import (
     InvalidAmountError,
     SameAccountTransferError,
 )
+from app.domain.bank.models import BankAccount
 from app.domain.bank.repository import AccountRepository, TransactionRepository
 from app.domain.bank.schemas import (
     AccountCreateRequest,
@@ -95,6 +97,56 @@ async def transfer(
         )
     except (InvalidAmountError, SameAccountTransferError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+
+@router.get(
+    "/accounts",
+    response_model=list[AccountResponse],
+)
+async def list_accounts(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[AccountResponse]:
+    """List bank accounts.
+
+    - **Customer**: sees only their own accounts.
+    - **BankTeller / Admin**: sees all accounts.
+    """
+    if current_user.role == Role.CUSTOMER:
+        result = await db.execute(
+            select(BankAccount).where(BankAccount.user_id == current_user.id)
+        )
+    else:
+        result = await db.execute(select(BankAccount))
+
+    accounts = list(result.scalars().all())
+    return [AccountResponse.model_validate(a) for a in accounts]
+
+
+@router.get(
+    "/accounts/{account_id}",
+    response_model=AccountResponse,
+)
+async def get_account(
+    account_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> AccountResponse:
+    """Get a single bank account by ID.
+
+    - **Customer**: can only view their own accounts.
+    - **BankTeller / Admin**: can view any account.
+    """
+    repo = AccountRepository(db)
+    account = await repo.get_by_id(account_id)
+    if account is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+    if current_user.role == Role.CUSTOMER and account.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only view your own accounts",
+        )
+    return AccountResponse.model_validate(account)
 
 
 @router.get(
