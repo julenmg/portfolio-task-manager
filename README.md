@@ -1,230 +1,321 @@
-# Secure Banking API
+# 🏦 Secure Banking API
 
-A production-ready REST API for a secure banking system built with **FastAPI**, **SQLAlchemy (async)**, and **PostgreSQL**. Designed with strict financial-data guarantees: atomic transfers, immutable audit ledger, and database-level balance constraints.
+API REST bancaria de nivel producción construida con **FastAPI**, **SQLAlchemy async** y **PostgreSQL**. Implementa transferencias atómicas, RBAC con JWT, cálculo de intereses compuestos y auditoría de seguridad automática.
+
+> **Demo visual:** una vez levantado el servidor, abre `http://localhost:8000/demo`
+> **Swagger UI:** `http://localhost:8000/docs`
 
 ---
 
-## Features
+## ✨ Características
 
-| Feature | Detail |
+| Característica | Detalle |
 |---|---|
-| **Atomic transfers** | Debit + credit + ledger entries in one SQL transaction — all or nothing |
-| **Deadlock prevention** | Rows locked with `SELECT FOR UPDATE` in ascending ID order |
-| **Non-negative balance** | `CHECK (balance >= 0)` enforced at the database level |
-| **Audit ledger** | Every balance change generates an immutable `transactions` entry |
-| **Compound interest** | Monthly / daily / annual compounding with full `Decimal` precision |
-| **Async I/O** | `asyncpg` driver + SQLAlchemy async engine for high concurrency |
-| **Schema migrations** | Alembic with `transaction_per_migration=True` — DDL always atomic |
+| **Transferencias atómicas** | Débito + crédito + ledger en una sola transacción SQL |
+| **Deadlock prevention** | Bloqueo `SELECT FOR UPDATE` en orden ascendente de ID |
+| **RBAC con JWT** | Roles `customer`, `bank_teller`, `admin` validados en BD cada request |
+| **Interés compuesto** | Compounding diario / mensual / anual con `Decimal` exacto |
+| **Audit middleware** | Registra automáticamente todo 401 / 403 en `audit_logs` |
+| **Balance no-negativo** | `CHECK (balance >= 0)` en la BD |
+| **Async I/O** | `asyncpg` + SQLAlchemy async engine |
+| **Migraciones** | Alembic con `transaction_per_migration=True` |
+| **Tests** | 58 tests · cobertura ≥ 90 % · SQLite en memoria |
 
 ---
 
-## Tech Stack
+## 🛠️ Stack
 
-- **Python 3.12** — language
-- **FastAPI 0.115** — web framework / OpenAPI docs at `/docs`
-- **SQLAlchemy 2.0 (async)** — ORM + explicit `begin()` transaction control
-- **asyncpg** — async PostgreSQL driver
-- **Alembic** — database migrations
-- **Pydantic v2** — request/response validation
-- **bcrypt** — password hashing
-- **PostgreSQL 16** — primary database (Docker Compose)
-- **pytest-asyncio + httpx** — async test suite, SQLite in-memory for tests
+- Python 3.12 · FastAPI 0.115 · SQLAlchemy 2.0 async · asyncpg
+- Alembic · Pydantic v2 · bcrypt · python-jose (JWT HS256)
+- PostgreSQL 16 (Docker Compose) · pytest-asyncio · httpx
 
 ---
 
-## Architecture
+## 🚀 Inicio rápido
 
-```
-app/
-├── core/
-│   ├── config.py          # Pydantic-settings (DATABASE_URL, SECRET_KEY…)
-│   └── database.py        # Async engine, Base, get_db → begin() per request
-│
-├── domain/
-│   └── bank/
-│       ├── models.py          # BankAccount · Transaction (ledger) · Transfer
-│       ├── schemas.py         # Pydantic request / response models
-│       ├── exceptions.py      # Typed domain errors (InsufficientFunds…)
-│       ├── repository.py      # AccountRepository (with FOR UPDATE) ·
-│       │                      # TransactionRepository · TransferRepository
-│       ├── transfer_service.py  # Atomic debit/credit in one session
-│       ├── interest_calculator.py  # Simple & compound interest (pure + DB)
-│       └── router.py          # POST /bank/accounts · POST /bank/transfers
-│
-├── models/
-│   └── user.py            # User ORM model (owns bank accounts)
-│
-├── routers/
-│   └── users.py           # POST /users/register
-│
-├── repositories/
-│   └── user_repository.py
-│
-├── schemas/
-│   └── user.py
-│
-├── services/
-│   └── user_service.py
-│
-└── main.py                # FastAPI app ("Secure Banking API")
-
-migrations/
-├── env.py                             # Async Alembic runner
-└── versions/
-    ├── 0000_create_users_table.py     # users table
-    └── 0001_create_bank_tables.py     # bank_accounts · transactions · transfers
-                                       #   + CHECK (balance >= 0)
-```
-
----
-
-## Database Schema
-
-```
-users
- └─< bank_accounts  (user_id FK, CHECK balance >= 0)
-       └─< transactions  (account_id FK — immutable ledger)
-       └─< transfers     (from/to account_id FK, CHECK from ≠ to)
-```
-
-### Atomicity contract
-
-A single transfer produces exactly **three writes** inside one transaction:
-
-```
-BEGIN
-  UPDATE bank_accounts SET balance = balance - :amount WHERE id = :from_id  -- debit
-  UPDATE bank_accounts SET balance = balance + :amount WHERE id = :to_id    -- credit
-  INSERT INTO transactions (account_id, type, …) VALUES (:from_id, 'DEBIT', …)
-  INSERT INTO transactions (account_id, type, …) VALUES (:to_id,   'CREDIT', …)
-  INSERT INTO transfers (reference_code, status, …) VALUES (:uuid, 'COMPLETED', …)
-COMMIT   ← auto by get_db begin() on clean exit
-ROLLBACK ← auto by get_db begin() on any exception
-```
-
----
-
-## API Endpoints
-
-### Health
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/health` | Liveness check |
-
-### Users
-
-| Method | Path | Body | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/users/register` | `email, username, password` | Create a user |
-
-### Bank accounts
-
-| Method | Path | Body | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/bank/accounts` | `user_id, account_type, interest_rate?, currency?` | Open an account |
-
-### Transfers
-
-| Method | Path | Body | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/bank/transfers` | `from_account_id, to_account_id, amount, description?` | Atomic transfer |
-
-Interactive docs available at **`http://localhost:8000/docs`** once the server is running.
-
----
-
-## Getting Started
-
-### 1. Clone & install
+### 1. Clonar e instalar
 
 ```bash
 git clone https://github.com/julenmg/portfolio-task-manager.git
 cd portfolio-task-manager
-python -m virtualenv .venv
-source .venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure environment
+### 2. Configurar entorno
 
 ```bash
 cp .env.example .env
-# edit .env if needed (DATABASE_URL, SECRET_KEY)
+# Edita .env si necesitas cambiar DATABASE_URL o SECRET_KEY
 ```
 
-### 3. Start PostgreSQL
+Contenido mínimo de `.env`:
+```env
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/task_manager
+SECRET_KEY=cambia-esto-en-produccion
+```
+
+### 3. Iniciar PostgreSQL con Docker
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Run migrations
+### 4. Aplicar migraciones
 
 ```bash
 alembic upgrade head
 ```
 
-### 5. Start the API
+### 5. Levantar el servidor
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-The API is now live at `http://localhost:8000`.
+La API está disponible en `http://localhost:8000`.
 
 ---
 
-## Running Tests
+## 🎬 Demo paso a paso
 
-Tests use an **SQLite in-memory database** — no Docker required.
+### Opción A — Interfaz visual (recomendada)
+
+1. Levanta el servidor: `uvicorn app.main:app --reload`
+2. Abre `http://localhost:8000/demo`
+3. Sigue los pasos del manual visual integrado
+
+### Opción B — curl / Swagger
+
+Sigue el flujo manual a continuación:
+
+---
+
+## 📖 Manual de uso
+
+### Paso 1 — Registrar usuarios
 
 ```bash
-pytest tests/ -v
+# Registrar un customer
+curl -X POST http://localhost:8000/api/v1/users/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","username":"alice","password":"alice1234"}'
+
+# Registrar otro customer
+curl -X POST http://localhost:8000/api/v1/users/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"bob@example.com","username":"bob","password":"bob1234"}'
 ```
 
-Coverage report is generated automatically. Current status:
+> Los usuarios se registran siempre como `CUSTOMER`. Para elevar a `bank_teller` o `admin` actualiza el campo `role` directamente en la BD o con una herramienta de administración.
 
-- **41 tests · 0 failures · ≥ 92 % coverage**
+### Paso 2 — Login y obtener JWT
 
-### Test layout
-
+```bash
+TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/auth/login \
+  -d "username=alice@example.com&password=alice1234" | jq -r .access_token)
+echo $TOKEN
 ```
-tests/
-├── conftest.py                   # SQLite engine, db_session, client fixtures
-├── bank/
-│   ├── conftest.py               # BankAccount fixtures
-│   ├── test_transfer_service.py  # 14 cases — atomic transfers + error paths
-│   └── test_interest_calculator.py  # 17 cases — pure math + DB apply
-└── (user registration tests live here if re-enabled)
+
+El token caduca en **60 minutos**.
+
+### Paso 3 — Crear cuentas (BankTeller / Admin)
+
+```bash
+# Necesitas un token con rol bank_teller o admin
+TELLER_TOKEN="..."
+
+# Cuenta corriente para Alice (user_id=1)
+curl -X POST http://localhost:8000/api/v1/bank/accounts \
+  -H "Authorization: Bearer $TELLER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":1,"account_type":"checking","currency":"EUR"}'
+
+# Cuenta ahorro para Alice (5% anual)
+curl -X POST http://localhost:8000/api/v1/bank/accounts \
+  -H "Authorization: Bearer $TELLER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":1,"account_type":"savings","interest_rate":0.05,"currency":"EUR"}'
+
+# Cuenta corriente para Bob (user_id=2)
+curl -X POST http://localhost:8000/api/v1/bank/accounts \
+  -H "Authorization: Bearer $TELLER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":2,"account_type":"checking","currency":"EUR"}'
+```
+
+### Paso 4 — Ver cuentas
+
+```bash
+# Alice ve solo sus propias cuentas
+curl http://localhost:8000/api/v1/bank/accounts \
+  -H "Authorization: Bearer $TOKEN"
+
+# Detalle de una cuenta concreta
+curl http://localhost:8000/api/v1/bank/accounts/1 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Paso 5 — Transferir dinero
+
+```bash
+# Transferencia de 150 € de cuenta 1 a cuenta 3
+curl -X POST http://localhost:8000/api/v1/bank/transfers \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from_account_id": 1,
+    "to_account_id": 3,
+    "amount": "150.00",
+    "description": "Pago alquiler"
+  }'
+```
+
+Respuesta:
+```json
+{
+  "reference_code": "550e8400-e29b-41d4-a716-446655440000",
+  "from_account_id": 1,
+  "to_account_id": 3,
+  "amount": "150.00",
+  "from_balance_after": "850.00",
+  "to_balance_after": "650.00"
+}
+```
+
+### Paso 6 — Consultar transacciones
+
+```bash
+curl "http://localhost:8000/api/v1/bank/accounts/1/transactions?limit=10" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Paso 7 — Ver audit logs (Admin)
+
+```bash
+ADMIN_TOKEN="..."
+curl http://localhost:8000/api/v1/audit/logs \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 ---
 
-## Interest Calculation
-
-### Simple interest
+## 📡 Referencia de endpoints
 
 ```
-I = P × r × (days / 365)
+GET  /health                                    → Health check
+GET  /demo                                      → Interfaz demo HTML
+GET  /docs                                      → Swagger UI
+GET  /redoc                                     → ReDoc
+
+POST /api/v1/users/register                     → Registrar usuario
+POST /api/v1/auth/login                         → Login → JWT
+
+POST /api/v1/bank/accounts                      → Crear cuenta (Teller/Admin)
+GET  /api/v1/bank/accounts                      → Listar cuentas
+GET  /api/v1/bank/accounts/{id}                 → Detalle de cuenta
+POST /api/v1/bank/transfers                     → Transferencia atómica
+GET  /api/v1/bank/accounts/{id}/transactions    → Historial de movimientos
+
+GET  /api/v1/audit/logs                         → Audit log (Admin)
 ```
-
-### Compound interest
-
-```
-I = P × (1 + r/n)^(n × days/365) − P
-```
-
-| Period | `n` |
-|---|---|
-| `daily` | 365 |
-| `monthly` | 12 |
-| `annually` | 1 |
-
-All arithmetic uses Python's `decimal.Decimal` for exact financial precision.
 
 ---
 
-## License
+## 🔐 RBAC — Control de acceso
+
+| Endpoint | Customer | BankTeller | Admin |
+|---|---|---|---|
+| Registro / Login | ✅ | ✅ | ✅ |
+| Ver cuentas | ✅ solo propias | ✅ todas | ✅ todas |
+| Crear cuenta | ❌ | ✅ | ✅ |
+| Transferir | ✅ solo desde propia | ✅ cualquiera | ✅ cualquiera |
+| Ver transacciones | ✅ solo propias | ✅ cualquiera | ✅ cualquiera |
+| Audit logs | ❌ | ❌ | ✅ |
+
+---
+
+## 🗃️ Esquema de base de datos
+
+```
+users
+ └─< bank_accounts   (user_id FK · CHECK balance >= 0)
+       └─< transactions  (ledger inmutable: DEBIT / CREDIT)
+       └─< transfers     (envelope: from_id, to_id, status, reference_code)
+audit_logs           (append-only · FK user_id nullable)
+```
+
+### Garantía de atomicidad por transferencia
+
+```sql
+BEGIN
+  SELECT … FOR UPDATE  -- bloquea ambas filas en orden ID ascendente
+  UPDATE bank_accounts SET balance = balance - :amount  -- débito
+  UPDATE bank_accounts SET balance = balance + :amount  -- crédito
+  INSERT INTO transactions (type='DEBIT',  reference_code=:uuid, …)
+  INSERT INTO transactions (type='CREDIT', reference_code=:uuid, …)
+  INSERT INTO transfers (status='COMPLETED', reference_code=:uuid, …)
+COMMIT   -- automático al salir del contexto get_db sin excepción
+ROLLBACK -- automático ante cualquier excepción
+```
+
+---
+
+## 🧪 Tests
+
+```bash
+# Ejecutar todos los tests con cobertura
+pytest
+
+# Solo un módulo
+pytest tests/bank/test_transfer_service.py -v
+```
+
+**Estado actual:** 58 tests · 0 fallos · cobertura ≥ 90 %
+
+| Suite | Tests | Qué cubre |
+|---|---|---|
+| `test_auth.py` | 4 | Login correcto/incorrecto, roles |
+| `test_transfer_service.py` | 13 | Transferencias: happy path + 8 casos de error |
+| `test_interest_calculator.py` | 13 | Interés simple/compuesto + apply con BD |
+| `test_rbac.py` | 20 | Permisos de cada rol en todos los endpoints |
+| `test_audit_middleware.py` | 8 | Audit logs 401/403, campos, user_id |
+
+---
+
+## 📁 Estructura del proyecto
+
+```
+portfolio-task-manager/
+├── app/
+│   ├── core/           # config, database, security (JWT)
+│   ├── domain/
+│   │   ├── auth/       # login router, JWT dependencies, schemas
+│   │   └── bank/       # models, repository, transfer_service,
+│   │                   # interest_calculator, router, exceptions
+│   ├── middleware/     # AuditMiddleware
+│   ├── models/         # User, AuditLog
+│   ├── repositories/   # UserRepository, AuditLogRepository
+│   ├── routers/        # users, audit
+│   ├── schemas/        # Pydantic user schemas
+│   ├── services/       # UserService
+│   └── main.py
+├── frontend/
+│   └── index.html      # Interfaz demo SPA
+├── migrations/         # Alembic versions
+├── tests/
+│   ├── conftest.py
+│   └── bank/
+├── docker-compose.yml
+├── requirements.txt
+├── pyproject.toml
+├── FEATURES.md         # Resumen detallado de funcionalidades
+└── README.md           # Este archivo
+```
+
+---
+
+## 📜 Licencia
 
 MIT
