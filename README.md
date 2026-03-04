@@ -36,8 +36,8 @@ API REST bancaria de nivel producción construida con **FastAPI**, **SQLAlchemy 
 ### 1. Clonar e instalar
 
 ```bash
-git clone https://github.com/julenmg/portfolio-task-manager.git
-cd portfolio-task-manager
+git clone https://github.com/julenmg/secure-banking-core.git
+cd secure-banking-core
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -287,7 +287,7 @@ pytest tests/bank/test_transfer_service.py -v
 ## 📁 Estructura del proyecto
 
 ```
-portfolio-task-manager/
+secure-banking-core/
 ├── app/
 │   ├── core/           # config, database, security (JWT)
 │   ├── domain/
