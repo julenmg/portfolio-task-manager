@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -30,7 +30,7 @@ router = APIRouter(prefix="/bank", tags=["bank"])
 
 
 def _generate_account_number() -> str:
-    return "ACC" + "".join(random.choices(string.digits, k=12))
+    return "ACC" + "".join(secrets.choice(string.digits) for _ in range(12))
 
 
 @router.post(
