@@ -76,3 +76,35 @@ async def test_login_admin_role(client: AsyncClient, db_session: AsyncSession) -
     )
     assert resp.status_code == 200
     assert resp.json()["role"] == Role.ADMIN.value
+
+
+@pytest.mark.asyncio
+async def test_login_inactive_user(client: AsyncClient, db_session: AsyncSession) -> None:
+    """Inactive users must receive 403 even with correct credentials."""
+    user = await _create_user(db_session, email="inactive@example.com", username="inactiveuser")
+    user.is_active = False
+    await db_session.flush()
+
+    resp = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "inactive@example.com", "password": "password123"},
+    )
+    assert resp.status_code == 403
+    assert "disabled" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_login_teller_role(client: AsyncClient, db_session: AsyncSession) -> None:
+    """Bank teller can login and receives the correct role in the response."""
+    await _create_user(
+        db_session,
+        email="teller@example.com",
+        username="telleruser",
+        role=Role.BANK_TELLER,
+    )
+    resp = await client.post(
+        "/api/v1/auth/login",
+        data={"username": "teller@example.com", "password": "password123"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["role"] == Role.BANK_TELLER.value

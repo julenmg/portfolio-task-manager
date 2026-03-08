@@ -7,6 +7,15 @@ API REST bancaria de nivel producción construida con **FastAPI**, **SQLAlchemy 
 
 ---
 
+## 📚 Documentación
+
+| Documento | Descripción |
+|---|---|
+| [Casos de uso](docs/use-cases.md) | Flujos UC-01 … UC-08 con ejemplos curl para cada actor |
+| [Screenshots](docs/screenshots/) | Capturas SVG de la interfaz demo |
+
+---
+
 ## ✨ Características
 
 | Característica | Detalle |
@@ -19,7 +28,7 @@ API REST bancaria de nivel producción construida con **FastAPI**, **SQLAlchemy 
 | **Balance no-negativo** | `CHECK (balance >= 0)` en la BD |
 | **Async I/O** | `asyncpg` + SQLAlchemy async engine |
 | **Migraciones** | Alembic con `transaction_per_migration=True` |
-| **Tests** | 58 tests · cobertura ≥ 90 % · SQLite en memoria |
+| **Tests** | 78+ tests · cobertura ≥ 90 % · SQLite en memoria |
 
 ---
 
@@ -272,11 +281,11 @@ pytest
 pytest tests/bank/test_transfer_service.py -v
 ```
 
-**Estado actual:** 58 tests · 0 fallos · cobertura ≥ 90 %
+**Estado actual:** 78+ tests · 0 fallos · cobertura ≥ 90 %
 
 | Suite | Tests | Qué cubre |
 |---|---|---|
-| `test_auth.py` | 4 | Login correcto/incorrecto, roles |
+| `test_auth.py` | 6 | Login correcto/incorrecto, roles, usuario inactivo |
 | `test_transfer_service.py` | 13 | Transferencias: happy path + 8 casos de error |
 | `test_interest_calculator.py` | 13 | Interés simple/compuesto + apply con BD |
 | `test_rbac.py` | 20 | Permisos de cada rol en todos los endpoints |

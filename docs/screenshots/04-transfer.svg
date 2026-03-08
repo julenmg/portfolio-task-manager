@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" style="font-family:Segoe UI,system-ui,sans-serif">
+<rect width="1200" height="800" fill="#0f1117"/>
+<!-- Transfer -->
+<rect x="0" y="0" width="220" height="800" fill="#1a1d27" stroke="#2e3347" stroke-width="1"/>
+<text x="16" y="36" fill="#5b8dee" font-size="16" font-weight="700">🏦 BankingAPI</text>
+<text x="16" y="52" fill="#94a3b8" font-size="10">Demo Interface v1.0</text>
+<line x1="0" y1="62" x2="220" y2="62" stroke="#2e3347"/>
+<text x="16" y="76" fill="#94a3b8" font-size="9" font-weight="600">CUENTA</text>
+<rect x="8" y="80" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="98" fill="#e2e8f0" font-size="13">🔑 Login</text>
+<rect x="8" y="114" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="132" fill="#e2e8f0" font-size="13">✏️ Registro</text>
+<text x="16" y="162" fill="#94a3b8" font-size="9" font-weight="600">BANCA</text>
+<rect x="8" y="166" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="184" fill="#e2e8f0" font-size="13">💳 Cuentas</text>
+<rect x="8" y="200" width="204" height="28" rx="6" fill="#5b8dee"/>
+<text x="28" y="218" fill="#fff" font-size="13">↔️ Transferir</text>
+<rect x="8" y="234" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="252" fill="#e2e8f0" font-size="13">📋 Transacciones</text>
+<text x="16" y="282" fill="#94a3b8" font-size="9" font-weight="600">ADMIN</text>
+<rect x="8" y="286" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="304" fill="#e2e8f0" font-size="13">➕ Nueva Cuenta</text>
+<rect x="8" y="320" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="338" fill="#e2e8f0" font-size="13">🔍 Audit Logs</text>
+<text x="16" y="368" fill="#94a3b8" font-size="9" font-weight="600">AYUDA</text>
+<rect x="8" y="372" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="390" fill="#e2e8f0" font-size="13">📡 API Reference</text>
+<text x="252" y="52" fill="#e2e8f0" font-size="22" font-weight="600">↔️ Transferencia</text>
+<text x="252" y="72" fill="#94a3b8" font-size="13">Envía dinero entre cuentas de forma atómica.</text>
+<rect x="252" y="90" width="460" height="420" rx="10" fill="#1a1d27" stroke="#2e3347" stroke-width="1"/>
+<text x="272" y="118" fill="#e2e8f0" font-size="13" font-weight="600">Nueva Transferencia</text>
+<text x="272" y="132" fill="#94a3b8" font-size="11" font-weight="500">ID Cuenta Origen</text>
+<rect x="272" y="138" width="420" height="34" rx="7" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="282" y="160" fill="#e2e8f0" font-size="12">1</text>
+<text x="272" y="192" fill="#94a3b8" font-size="11" font-weight="500">ID Cuenta Destino</text>
+<rect x="272" y="198" width="420" height="34" rx="7" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="282" y="220" fill="#e2e8f0" font-size="12">2</text>
+<text x="272" y="252" fill="#94a3b8" font-size="11" font-weight="500">Importe (EUR)</text>
+<rect x="272" y="258" width="420" height="34" rx="7" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="282" y="280" fill="#e2e8f0" font-size="12">250.00</text>
+<text x="272" y="312" fill="#94a3b8" font-size="11" font-weight="500">Descripción (opcional)</text>
+<rect x="272" y="318" width="420" height="34" rx="7" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="282" y="340" fill="#94a3b8" font-size="12">Pago alquiler</text>
+<rect x="272" y="368" width="120" height="36" rx="7" fill="#5b8dee"/>
+<text x="332" y="390" fill="#fff" font-size="13" font-weight="600" text-anchor="middle">Transferir</text>
+<rect x="272" y="416" width="420" height="36" rx="7" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1"/>
+<text x="286" y="438" fill="#22c55e" font-size="12">✓ Transferencia completada. Ref: 550e8400-e29b…</text>
+<rect x="272" y="464" width="420" height="70" rx="7" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="282" y="482" fill="#94a3b8" font-size="10" font-family="monospace">  "reference_code": "550e8400-e29b-41d4-a716-4466554400",</text>
+<text x="282" y="498" fill="#94a3b8" font-size="10" font-family="monospace">  "from_balance_after": "750.00",</text>
+<text x="282" y="514" fill="#94a3b8" font-size="10" font-family="monospace">  "to_balance_after": "750.00"</text>
+</svg>

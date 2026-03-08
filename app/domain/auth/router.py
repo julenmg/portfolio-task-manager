@@ -25,13 +25,21 @@ async def login(
     # OAuth2PasswordRequestForm uses "username" field — we treat it as email.
     user = await UserRepository(db).get_by_email(form.username)
 
+    invalid_credentials = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Incorrect email or password",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
     if user is None or not bcrypt.checkpw(
         form.password.encode(), user.hashed_password.encode()
     ):
+        raise invalid_credentials
+
+    if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is disabled",
         )
 
     token = create_access_token(user.id, user.role.value)

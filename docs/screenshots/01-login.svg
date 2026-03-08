@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" style="font-family:Segoe UI,system-ui,sans-serif">
+<rect width="1200" height="800" fill="#0f1117"/>
+<!-- Login -->
+<rect x="0" y="0" width="220" height="800" fill="#1a1d27" stroke="#2e3347" stroke-width="1"/>
+<text x="16" y="36" fill="#5b8dee" font-size="16" font-weight="700">🏦 BankingAPI</text>
+<text x="16" y="52" fill="#94a3b8" font-size="10">Demo Interface v1.0</text>
+<line x1="0" y1="62" x2="220" y2="62" stroke="#2e3347"/>
+<text x="16" y="76" fill="#94a3b8" font-size="9" font-weight="600">CUENTA</text>
+<rect x="8" y="80" width="204" height="28" rx="6" fill="#5b8dee"/>
+<text x="28" y="98" fill="#fff" font-size="13">🔑 Login</text>
+<rect x="8" y="114" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="132" fill="#e2e8f0" font-size="13">✏️ Registro</text>
+<text x="16" y="162" fill="#94a3b8" font-size="9" font-weight="600">BANCA</text>
+<rect x="8" y="166" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="184" fill="#e2e8f0" font-size="13">💳 Cuentas</text>
+<rect x="8" y="200" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="218" fill="#e2e8f0" font-size="13">↔️ Transferir</text>
+<rect x="8" y="234" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="252" fill="#e2e8f0" font-size="13">📋 Transacciones</text>
+<text x="16" y="282" fill="#94a3b8" font-size="9" font-weight="600">ADMIN</text>
+<rect x="8" y="286" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="304" fill="#e2e8f0" font-size="13">➕ Nueva Cuenta</text>
+<rect x="8" y="320" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="338" fill="#e2e8f0" font-size="13">🔍 Audit Logs</text>
+<text x="16" y="368" fill="#94a3b8" font-size="9" font-weight="600">AYUDA</text>
+<rect x="8" y="372" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="390" fill="#e2e8f0" font-size="13">📡 API Reference</text>
+<text x="252" y="52" fill="#e2e8f0" font-size="22" font-weight="600">🔑 Iniciar Sesión</text>
+<text x="252" y="72" fill="#94a3b8" font-size="13">Accede con tu email y contraseña para obtener un JWT.</text>
+<rect x="252" y="90" width="420" height="240" rx="10" fill="#1a1d27" stroke="#2e3347" stroke-width="1"/>
+<text x="272" y="118" fill="#e2e8f0" font-size="13" font-weight="600">Credenciales</text>
+<text x="272" y="132" fill="#94a3b8" font-size="11" font-weight="500">Email</text>
+<rect x="272" y="138" width="380" height="34" rx="7" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="282" y="160" fill="#e2e8f0" font-size="12">admin@demo.com</text>
+<text x="272" y="192" fill="#94a3b8" font-size="11" font-weight="500">Contraseña</text>
+<rect x="272" y="198" width="380" height="34" rx="7" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="282" y="220" fill="#e2e8f0" font-size="12">••••••••</text>
+<rect x="272" y="244" width="100" height="36" rx="7" fill="#5b8dee"/>
+<text x="322" y="266" fill="#fff" font-size="13" font-weight="600" text-anchor="middle">Entrar</text>
+<rect x="252" y="348" width="420" height="170" rx="10" fill="#1a1d27" stroke="#2e3347" stroke-width="1"/>
+<text x="272" y="376" fill="#e2e8f0" font-size="13" font-weight="600">Credenciales de Demo</text>
+<rect x="272" y="392" width="49" height="18" rx="4" fill="rgba(124,58,237,0.15)"/>
+<text x="279" y="404" fill="#7c3aed" font-size="9" font-weight="700">ADMIN</text>
+<text x="362" y="404" fill="#e2e8f0" font-size="11">admin@demo.com</text>
+<text x="542" y="404" fill="#94a3b8" font-size="11">admin1234</text>
+<rect x="622" y="390" width="42" height="20" rx="5" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="643" y="404" fill="#e2e8f0" font-size="10" text-anchor="middle">Usar</text>
+<rect x="272" y="428" width="56" height="18" rx="4" fill="rgba(245,158,11,0.15)"/>
+<text x="279" y="440" fill="#f59e0b" font-size="9" font-weight="700">TELLER</text>
+<text x="362" y="440" fill="#e2e8f0" font-size="11">teller@demo.com</text>
+<text x="542" y="440" fill="#94a3b8" font-size="11">teller1234</text>
+<rect x="622" y="426" width="42" height="20" rx="5" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="643" y="440" fill="#e2e8f0" font-size="10" text-anchor="middle">Usar</text>
+<rect x="272" y="464" width="70" height="18" rx="4" fill="rgba(91,141,238,0.15)"/>
+<text x="279" y="476" fill="#5b8dee" font-size="9" font-weight="700">CUSTOMER</text>
+<text x="362" y="476" fill="#e2e8f0" font-size="11">alice@demo.com</text>
+<text x="542" y="476" fill="#94a3b8" font-size="11">alice1234</text>
+<rect x="622" y="462" width="42" height="20" rx="5" fill="#232636" stroke="#2e3347" stroke-width="1"/>
+<text x="643" y="476" fill="#e2e8f0" font-size="10" text-anchor="middle">Usar</text>
+</svg>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" style="font-family:Segoe UI,system-ui,sans-serif">
+<rect width="1200" height="800" fill="#0f1117"/>
+<!-- Audit Logs -->
+<rect x="0" y="0" width="220" height="800" fill="#1a1d27" stroke="#2e3347" stroke-width="1"/>
+<text x="16" y="36" fill="#5b8dee" font-size="16" font-weight="700">🏦 BankingAPI</text>
+<text x="16" y="52" fill="#94a3b8" font-size="10">Demo Interface v1.0</text>
+<line x1="0" y1="62" x2="220" y2="62" stroke="#2e3347"/>
+<text x="16" y="76" fill="#94a3b8" font-size="9" font-weight="600">CUENTA</text>
+<rect x="8" y="80" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="98" fill="#e2e8f0" font-size="13">🔑 Login</text>
+<rect x="8" y="114" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="132" fill="#e2e8f0" font-size="13">✏️ Registro</text>
+<text x="16" y="162" fill="#94a3b8" font-size="9" font-weight="600">BANCA</text>
+<rect x="8" y="166" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="184" fill="#e2e8f0" font-size="13">💳 Cuentas</text>
+<rect x="8" y="200" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="218" fill="#e2e8f0" font-size="13">↔️ Transferir</text>
+<rect x="8" y="234" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="252" fill="#e2e8f0" font-size="13">📋 Transacciones</text>
+<text x="16" y="282" fill="#94a3b8" font-size="9" font-weight="600">ADMIN</text>
+<rect x="8" y="286" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="304" fill="#e2e8f0" font-size="13">➕ Nueva Cuenta</text>
+<rect x="8" y="320" width="204" height="28" rx="6" fill="#5b8dee"/>
+<text x="28" y="338" fill="#fff" font-size="13">🔍 Audit Logs</text>
+<text x="16" y="368" fill="#94a3b8" font-size="9" font-weight="600">AYUDA</text>
+<rect x="8" y="372" width="204" height="28" rx="6" fill="none"/>
+<text x="28" y="390" fill="#e2e8f0" font-size="13">📡 API Reference</text>
+<text x="252" y="52" fill="#e2e8f0" font-size="22" font-weight="600">🔍 Audit Logs</text>
+<text x="252" y="72" fill="#94a3b8" font-size="13">Registro de intentos no autorizados. Solo Admin.</text>
+<rect x="252" y="90" width="916" height="380" rx="10" fill="#1a1d27" stroke="#2e3347" stroke-width="1"/>
+<text x="272" y="118" fill="#e2e8f0" font-size="13" font-weight="600">Registros de Auditoría</text>
+<rect x="252" y="130" width="916" height="30" fill="#232636"/>
+<text x="272" y="149" fill="#94a3b8" font-size="10" font-weight="600">ID</text>
+<text x="302" y="149" fill="#94a3b8" font-size="10" font-weight="600">MÉTODO</text>
+<text x="362" y="149" fill="#94a3b8" font-size="10" font-weight="600">RUTA</text>
+<text x="592" y="149" fill="#94a3b8" font-size="10" font-weight="600">IP</text>
+<text x="682" y="149" fill="#94a3b8" font-size="10" font-weight="600">USER ID</text>
+<text x="762" y="149" fill="#94a3b8" font-size="10" font-weight="600">STATUS</text>
+<text x="842" y="149" fill="#94a3b8" font-size="10" font-weight="600">MOTIVO</text>
+<text x="972" y="149" fill="#94a3b8" font-size="10" font-weight="600">FECHA</text>
+<line x1="252" y1="166" x2="1168" y2="166" stroke="#2e3347"/>
+<text x="272" y="184" fill="#e2e8f0" font-size="12">1</text>
+<rect x="302" y="172" width="35" height="18" rx="4" fill="rgba(91,141,238,0.15)"/>
+<text x="309" y="184" fill="#5b8dee" font-size="9" font-weight="700">GET</text>
+<text x="362" y="184" fill="#94a3b8" font-size="9" font-family="monospace">/api/v1/audit/logs</text>
+<text x="592" y="184" fill="#e2e8f0" font-size="11">192.168.1.42</text>
+<text x="682" y="184" fill="#e2e8f0" font-size="12">—</text>
+<rect x="762" y="172" width="35" height="18" rx="4" fill="rgba(245,158,11,0.15)"/>
+<text x="769" y="184" fill="#f59e0b" font-size="9" font-weight="700">401</text>
+<text x="842" y="184" fill="#94a3b8" font-size="9">Token expirado</text>
+<text x="972" y="184" fill="#94a3b8" font-size="10">08/03/26 10:02</text>
+<line x1="252" y1="212" x2="1168" y2="212" stroke="#2e3347"/>
+<text x="272" y="230" fill="#e2e8f0" font-size="12">2</text>
+<rect x="302" y="218" width="42" height="18" rx="4" fill="rgba(34,197,94,0.15)"/>
+<text x="309" y="230" fill="#22c55e" font-size="9" font-weight="700">POST</text>
+<text x="362" y="230" fill="#94a3b8" font-size="9" font-family="monospace">/api/v1/bank/accounts</text>
+<text x="592" y="230" fill="#e2e8f0" font-size="11">192.168.1.15</text>
+<text x="682" y="230" fill="#e2e8f0" font-size="12">3</text>
+<rect x="762" y="218" width="35" height="18" rx="4" fill="rgba(239,68,68,0.15)"/>
+<text x="769" y="230" fill="#ef4444" font-size="9" font-weight="700">403</text>
+<text x="842" y="230" fill="#94a3b8" font-size="9">Requires role: bank_teller or </text>
+<text x="972" y="230" fill="#94a3b8" font-size="10">08/03/26 10:05</text>
+<line x1="252" y1="258" x2="1168" y2="258" stroke="#2e3347"/>
+<text x="272" y="276" fill="#e2e8f0" font-size="12">3</text>
+<rect x="302" y="264" width="35" height="18" rx="4" fill="rgba(91,141,238,0.15)"/>
+<text x="309" y="276" fill="#5b8dee" font-size="9" font-weight="700">GET</text>
+<text x="362" y="276" fill="#94a3b8" font-size="9" font-family="monospace">/api/v1/bank/accounts/7</text>
+<text x="592" y="276" fill="#e2e8f0" font-size="11">10.0.0.11</text>
+<text x="682" y="276" fill="#e2e8f0" font-size="12">5</text>
+<rect x="762" y="264" width="35" height="18" rx="4" fill="rgba(239,68,68,0.15)"/>
+<text x="769" y="276" fill="#ef4444" font-size="9" font-weight="700">403</text>
+<text x="842" y="276" fill="#94a3b8" font-size="9">You can only view your own acc</text>
+<text x="972" y="276" fill="#94a3b8" font-size="10">08/03/26 10:08</text>
+<line x1="252" y1="304" x2="1168" y2="304" stroke="#2e3347"/>
+<text x="272" y="322" fill="#e2e8f0" font-size="12">4</text>
+<rect x="302" y="310" width="35" height="18" rx="4" fill="rgba(91,141,238,0.15)"/>
+<text x="309" y="322" fill="#5b8dee" font-size="9" font-weight="700">GET</text>
+<text x="362" y="322" fill="#94a3b8" font-size="9" font-family="monospace">/api/v1/audit/logs</text>
+<text x="592" y="322" fill="#e2e8f0" font-size="11">192.168.1.42</text>
+<text x="682" y="322" fill="#e2e8f0" font-size="12">—</text>
+<rect x="762" y="310" width="35" height="18" rx="4" fill="rgba(245,158,11,0.15)"/>
+<text x="769" y="322" fill="#f59e0b" font-size="9" font-weight="700">401</text>
+<text x="842" y="322" fill="#94a3b8" font-size="9">Could not validate credentials</text>
+<text x="972" y="322" fill="#94a3b8" font-size="10">08/03/26 10:11</text>
+</svg>
