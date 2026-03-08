@@ -188,8 +188,10 @@
         <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
         <div class="alert" id="login-alert"></div>
         <div id="login-token-wrap" style="display:none">
-          <p style="font-size:0.75rem;color:var(--muted);margin-top:12px">Token JWT:</p>
-          <div class="token-box" id="login-token"></div>
+          <p style="font-size:0.75rem;color:var(--muted);margin-top:12px">
+            Token JWT activo <span style="color:var(--green)">✓</span>
+            <span style="font-size:0.7rem;color:var(--muted)">(almacenado en memoria, no expuesto en DOM)</span>
+          </p>
         </div>
       </div>
       <div class="card" style="max-width:440px">
@@ -200,20 +202,20 @@
             <tr>
               <td><span class="badge badge-purple">Admin</span></td>
               <td>admin@demo.com</td>
-              <td>admin1234</td>
-              <td><button class="btn btn-secondary btn-sm" onclick="fillLogin('admin@demo.com','admin1234')">Usar</button></td>
+              <td>Admin1234</td>
+              <td><button class="btn btn-secondary btn-sm" onclick="fillLogin('admin@demo.com','Admin1234')">Usar</button></td>
             </tr>
             <tr>
               <td><span class="badge badge-yellow">Teller</span></td>
               <td>teller@demo.com</td>
-              <td>teller1234</td>
-              <td><button class="btn btn-secondary btn-sm" onclick="fillLogin('teller@demo.com','teller1234')">Usar</button></td>
+              <td>Teller1234</td>
+              <td><button class="btn btn-secondary btn-sm" onclick="fillLogin('teller@demo.com','Teller1234')">Usar</button></td>
             </tr>
             <tr>
               <td><span class="badge badge-blue">Customer</span></td>
               <td>alice@demo.com</td>
-              <td>alice1234</td>
-              <td><button class="btn btn-secondary btn-sm" onclick="fillLogin('alice@demo.com','alice1234')">Usar</button></td>
+              <td>Alice1234</td>
+              <td><button class="btn btn-secondary btn-sm" onclick="fillLogin('alice@demo.com','Alice1234')">Usar</button></td>
             </tr>
           </tbody>
         </table>
@@ -448,6 +450,15 @@
   let token = null;
   let currentUser = null;
 
+  // ── Security: HTML-escape helper ──────────────────────────────────────────
+  // All API data must be rendered via esc() before being inserted into HTML
+  // to prevent XSS if the API response is ever tampered with.
+  function esc(value) {
+    const d = document.createElement('div');
+    d.textContent = (value === null || value === undefined) ? '' : String(value);
+    return d.innerHTML;
+  }
+
   // ── Navigation ────────────────────────────────────────────────────────────
   function showPanel(name) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -515,7 +526,6 @@
     document.getElementById('user-role-badge').textContent = data.role.toUpperCase();
     document.getElementById('user-email-badge').textContent = email;
     document.getElementById('login-token-wrap').style.display = 'block';
-    document.getElementById('login-token').textContent = token;
 
     showAlert('login-alert', `¡Bienvenido! Rol: ${data.role}`, 'success');
   }
@@ -542,10 +552,10 @@
 
   async function createDemoUsers() {
     const users = [
-      { email: 'admin@demo.com', username: 'admin_demo', password: 'admin1234' },
-      { email: 'teller@demo.com', username: 'teller_demo', password: 'teller1234' },
-      { email: 'alice@demo.com', username: 'alice', password: 'alice1234' },
-      { email: 'bob@demo.com', username: 'bob', password: 'bob1234' },
+      { email: 'admin@demo.com', username: 'admin_demo', password: 'Admin1234' },
+      { email: 'teller@demo.com', username: 'teller_demo', password: 'Teller1234' },
+      { email: 'alice@demo.com', username: 'alice', password: 'Alice1234' },
+      { email: 'bob@demo.com', username: 'bob', password: 'Bob12345' },
     ];
     let created = 0, skipped = 0;
     for (const u of users) {
@@ -568,15 +578,15 @@
     }
     tbody.innerHTML = data.map(a => `
       <tr>
-        <td>${a.id}</td>
-        <td><code>${a.account_number}</code></td>
-        <td><span class="badge ${a.account_type === 'savings' ? 'badge-blue' : 'badge-green'}">${a.account_type}</span></td>
-        <td><strong>${parseFloat(a.balance).toFixed(2)}</strong></td>
-        <td>${a.currency}</td>
-        <td>${(parseFloat(a.interest_rate) * 100).toFixed(2)}%</td>
+        <td>${esc(a.id)}</td>
+        <td><code>${esc(a.account_number)}</code></td>
+        <td><span class="badge ${a.account_type === 'savings' ? 'badge-blue' : 'badge-green'}">${esc(a.account_type)}</span></td>
+        <td><strong>${esc(parseFloat(a.balance).toFixed(2))}</strong></td>
+        <td>${esc(a.currency)}</td>
+        <td>${esc((parseFloat(a.interest_rate) * 100).toFixed(2))}%</td>
         <td><span class="badge ${a.is_active ? 'badge-green' : 'badge-red'}">${a.is_active ? 'Activa' : 'Inactiva'}</span></td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="quickTxn(${a.id})">📋 Txn</button>
+          <button class="btn btn-secondary btn-sm" onclick="quickTxn(${parseInt(a.id, 10)})">📋 Txn</button>
         </td>
       </tr>
     `).join('');
@@ -623,15 +633,15 @@
     }
     tbody.innerHTML = data.map(t => `
       <tr>
-        <td>${t.id}</td>
-        <td><span class="badge ${t.transaction_type === 'CREDIT' ? 'badge-green' : 'badge-red'}">${t.transaction_type}</span></td>
+        <td>${esc(t.id)}</td>
+        <td><span class="badge ${t.transaction_type === 'CREDIT' ? 'badge-green' : 'badge-red'}">${esc(t.transaction_type)}</span></td>
         <td><strong style="color:${t.transaction_type === 'CREDIT' ? 'var(--green)' : 'var(--red)'}">
-          ${t.transaction_type === 'CREDIT' ? '+' : '-'}${parseFloat(t.amount).toFixed(2)}
+          ${t.transaction_type === 'CREDIT' ? '+' : '-'}${esc(parseFloat(t.amount).toFixed(2))}
         </strong></td>
-        <td>${parseFloat(t.balance_after).toFixed(2)}</td>
-        <td>${t.description || '—'}</td>
-        <td><code style="font-size:0.7rem">${t.reference_code ? t.reference_code.substring(0,8) + '…' : '—'}</code></td>
-        <td>${formatDate(t.created_at)}</td>
+        <td>${esc(parseFloat(t.balance_after).toFixed(2))}</td>
+        <td>${esc(t.description || '—')}</td>
+        <td><code style="font-size:0.7rem">${t.reference_code ? esc(t.reference_code.substring(0,8)) + '…' : '—'}</code></td>
+        <td>${esc(formatDate(t.created_at))}</td>
       </tr>
     `).join('');
   }
@@ -668,14 +678,14 @@
     }
     tbody.innerHTML = data.map(l => `
       <tr>
-        <td>${l.id}</td>
-        <td><span class="badge ${l.method === 'GET' ? 'badge-blue' : 'badge-green'}">${l.method}</span></td>
-        <td><code style="font-size:0.75rem">${l.path}</code></td>
-        <td>${l.client_ip}</td>
-        <td>${l.user_id ?? '—'}</td>
-        <td><span class="badge ${l.status_code === 401 ? 'badge-yellow' : 'badge-red'}">${l.status_code}</span></td>
-        <td>${l.reason || '—'}</td>
-        <td>${formatDate(l.created_at)}</td>
+        <td>${esc(l.id)}</td>
+        <td><span class="badge ${l.method === 'GET' ? 'badge-blue' : 'badge-green'}">${esc(l.method)}</span></td>
+        <td><code style="font-size:0.75rem">${esc(l.path)}</code></td>
+        <td>${esc(l.client_ip)}</td>
+        <td>${esc(l.user_id ?? '—')}</td>
+        <td><span class="badge ${l.status_code === 401 ? 'badge-yellow' : 'badge-red'}">${esc(l.status_code)}</span></td>
+        <td>${esc(l.reason || '—')}</td>
+        <td>${esc(formatDate(l.created_at))}</td>
       </tr>
     `).join('');
   }

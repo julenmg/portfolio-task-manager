@@ -15,6 +15,20 @@ class UserRegisterRequest(BaseModel):
             raise ValueError("Username must contain only letters, numbers, hyphens, or underscores")
         return value.lower()
 
+    @field_validator("password")
+    @classmethod
+    def password_complexity(cls, value: str) -> str:
+        errors: list[str] = []
+        if not any(c.isupper() for c in value):
+            errors.append("at least one uppercase letter")
+        if not any(c.islower() for c in value):
+            errors.append("at least one lowercase letter")
+        if not any(c.isdigit() for c in value):
+            errors.append("at least one digit")
+        if errors:
+            raise ValueError(f"Password must contain {', '.join(errors)}")
+        return value
+
 
 class UserResponse(BaseModel):
     id: int

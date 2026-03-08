@@ -1,4 +1,16 @@
-"""Audit middleware — logs every 401 / 403 response for fraud detection."""
+"""Audit middleware — logs security-relevant HTTP events.
+
+Events recorded
+---------------
+- 401 Unauthorized  → failed / missing authentication
+- 403 Forbidden     → authenticated but lacking permission
+- 200 on /auth/login → successful login (compliance requirement)
+
+Failures writing to the audit log are logged at ERROR level and never
+propagated to the client so that audit issues don't break service.
+"""
+
+import logging
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -8,25 +20,30 @@ from app.core.database import AsyncSessionLocal
 from app.core.security import extract_user_id_from_header
 from app.models.audit_log import AuditLog
 
+logger = logging.getLogger(__name__)
+
+_AUTH_LOGIN_PATH = "/api/v1/auth/login"
+
+_REASONS: dict[int, str] = {
+    200: "Successful login",
+    401: "Unauthenticated access attempt",
+    403: "Unauthorized access attempt",
+}
+
 
 class AuditMiddleware(BaseHTTPMiddleware):
-    """Record failed authentication / authorisation attempts in the audit_logs table.
-
-    Reasons logged:
-    - 401 Unauthorized  → "Unauthenticated access attempt"
-    - 403 Forbidden     → "Unauthorized access attempt"
-
-    The write is intentionally synchronous with the response so that tests
-    can query audit rows immediately after the HTTP call returns.
-
-    The session factory is read from ``request.app.state.session_factory`` so
-    that tests can inject ``TestSessionLocal`` before the app starts serving.
-    """
-
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        if response.status_code in {401, 403}:
+
+        should_log = response.status_code in {401, 403} or (
+            response.status_code == 200
+            and request.url.path == _AUTH_LOGIN_PATH
+            and request.method == "POST"
+        )
+
+        if should_log:
             await self._write_audit_log(request, response.status_code)
+
         return response
 
     def _extract_user_id(self, request: Request) -> int | None:
@@ -35,11 +52,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
     async def _write_audit_log(self, request: Request, status_code: int) -> None:
         user_id = self._extract_user_id(request)
-        reason = (
-            "Unauthenticated access attempt"
-            if status_code == 401
-            else "Unauthorized access attempt"
-        )
+        reason = _REASONS.get(status_code, "Security event")
         client_ip = request.client.host if request.client else "unknown"
 
         session_factory = getattr(
@@ -60,5 +73,12 @@ class AuditMiddleware(BaseHTTPMiddleware):
                         )
                     )
         except Exception:
-            # Never let audit failures propagate back to the client.
-            pass
+            # Never let audit failures surface to the client, but DO log them
+            # so that on-call engineers are alerted.
+            logger.error(
+                "Failed to write audit log for %s %s (status=%s)",
+                request.method,
+                request.url.path,
+                status_code,
+                exc_info=True,
+            )

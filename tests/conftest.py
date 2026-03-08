@@ -5,6 +5,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
 from app.main import app
+from app.middleware.rate_limit import login_rate_limit
 
 # StaticPool forces all connections (including the AuditMiddleware's own
 # sessions) to reuse the same underlying SQLite connection, so committed
@@ -44,7 +45,12 @@ async def client(db_session: AsyncSession) -> AsyncClient:
     async def override_get_db():
         yield db_session
 
+    async def override_rate_limit():
+        # Disable rate limiting in tests to prevent cross-test interference.
+        return None
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[login_rate_limit] = override_rate_limit
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
